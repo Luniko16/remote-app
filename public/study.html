@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LessonCraft - AI-Powered Educational Content Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4ade80;
+            --warning: #facc15;
+            --danger: #f87171;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            color: #5a6268;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: var(--accent);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #edf2f7;
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .output-container {
+            background: #f8fafc;
+            border-radius: var(--radius);
+            padding: 25px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            line-height: 1.6;
+        }
+        
+        .output-container h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .output-container p {
+            margin-bottom: 15px;
+        }
+        
+        .output-container ul, .output-container ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            display: none;
+            background: #fff5f5;
+            border: 1px solid var(--danger);
+            border-radius: var(--radius);
+            padding: 15px;
+            color: var(--danger);
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+        
+        .content-type {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .content-type-btn {
+            padding: 12px;
+            background: #edf2f7;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        
+        .content-type-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .content-type-btn.active {
+            background: #dbeafe;
+            border-color: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LessonCraft</h1>
+            <p>AI-Powered Educational Content Generator - Create lesson plans, study guides, and classroom activities in seconds</p>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2 class="card-title"><i class="icon">📝</i> Content Parameters</h2>
+                
+                <div class="input-group">
+                    <label for="topic">Topic/Subject</label>
+                    <input type="text" id="topic" placeholder="Enter a topic (e.g. Photosynthesis, World War II, Algebra)">
+                </div>
+                
+                <div class="input-group">
+                    <label for="gradeLevel">Grade Level</label>
+                    <select id="gradeLevel">
+                        <option value="elementary">Elementary School</option>
+                        <option value="middle-school" selected>Middle School</option>
+                        <option value="high-school">High School</option>
+                        <option value="college">College/University</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="learningStyle">Learning Style</label>
+                    <select id="learningStyle">
+                        <option value="visual">Visual</option>
+                        <option value="auditory">Auditory</option>
+                        <option value="kinesthetic">Kinesthetic</option>
+                        <option value="mixed">Mixed</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Content Type</label>
+                    <div class="content-type">
+                        <div class="content-type-btn active" data-type="lesson-plan">Lesson Plan</div>
+                        <div class="content-type-btn" data-type="study-guide">Study Guide</div>
+                        <div class="content-type-btn" data-type="activity-ideas">Activities</div>
+                        <div class="content-type-btn" data-type="assessment-items">Assessments</div>
+                    </div>
+                </div>
+                
+                <button id="generateBtn" class="btn">Generate Content</button>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="icon">📚</i> Generated Content</h2>
+                
+                <div class="loader" id="loader">
+                    <div class="loader-spinner"></div>
+                    <p>Generating educational content...</p>
+                </div>
+                
+                <div class="output-container" id="outputContainer">
+                    <p>Your generated content will appear here. Fill in the parameters on the left and click "Generate Content" to get started.</p>
+                </div>
+                
+                <div class="export-options">
+                    <button id="exportTxt" class="btn btn-secondary">Save as Text</button>
+                    <button id="exportPdf" class="btn btn-secondary">Export as PDF</button>
+                    <button id="exportGoogle" class="btn btn-secondary">Save to Google Drive</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="icon">💡</i> How It Works</h2>
+            <div class="output-container">
+                <h3>AI-Powered Educational Content Generation</h3>
+                <p>LessonCraft uses advanced AI models to generate high-quality educational materials tailored to your specifications:</p>
+                
+                <ul>
+                    <li><strong>Customized for grade level</strong> - Content is adjusted for appropriate complexity</li>
+                    <li><strong>Learning style optimized</strong> - Materials designed for visual, auditory, or kinesthetic learners</li>
+                    <li><strong>Curriculum-aligned</strong> - Follows educational standards and best practices</li>
+                    <li><strong>Time-saving</strong> - Create classroom-ready materials in minutes instead of hours</li>
+                </ul>
+                
+                <h3>Content Types:</h3>
+                <ol>
+                    <li><strong>Lesson Plans</strong> - Complete with objectives, activities, and assessments</li>
+                    <li><strong>Study Guides</strong> - Concise summaries and review materials</li>
+                    <li><strong>Activity Ideas</strong> - Engaging classroom activities and projects</li>
+                    <li><strong>Assessment Items</strong> - Quizzes, tests, and evaluation materials</li>
+                </ol>
+            </div>
+        </div>
+        
+        <footer>
+            <p>LessonCraft - AI Educational Content Generator | Created for Teachers & Educators</p>
+            <p>Note: This is a frontend demonstration. In a production environment, this would connect to a backend with OpenAI API integration.</p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">Content saved successfully!</div>
+    
+    <script>
+        // DOM Elements
+        const topicInput = document.getElementById('topic');
+        const gradeLevelSelect = document.getElementById('gradeLevel');
+        const learningStyleSelect = document.getElementById('learningStyle');
+        const generateBtn = document.getElementById('generateBtn');
+        const outputContainer = document.getElementById('outputContainer');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('errorMessage');
+        const exportTxtBtn = document.getElementById('exportTxt');
+        const exportPdfBtn = document.getElementById('exportPdf');
+        const exportGoogleBtn = document.getElementById('exportGoogle');
+        const notification = document.getElementById('notification');
+        const contentTypeButtons = document.querySelectorAll('.content-type-btn');
+        
+        // Current content type (default to lesson-plan)
+        let currentContentType = 'lesson-plan';
+        
+        // Set active content type
+        contentTypeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                contentTypeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentContentType = btn.dataset.type;
+            });
+        });
+        
+        // Generate content function
+        generateBtn.addEventListener('click', () => {
+            const topic = topicInput.value.trim();
+            const gradeLevel = gradeLevelSelect.value;
+            const learningStyle = learningStyleSelect.value;
+            
+            // Input validation
+            if (!topic) {
+                showError('Please enter a topic');
+                return;
+            }
+            
+            if (topic.length < 5) {
+                showError('Topic must be at least 5 characters');
+                return;
+            }
+            
+            // Clear previous output and errors
+            outputContainer.innerHTML = '';
+            hideError();
+            
+            // Show loader
+            loader.style.display = 'block';
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Hide loader
+                loader.style.display = 'none';
+                
+                // Generate content based on parameters
+                const content = generateEducationalContent(topic, gradeLevel, learningStyle, currentContentType);
+                
+                // Display content
+                outputContainer.innerHTML = content;
+            }, 1500);
+        });
+        
+        // Export functions
+        exportTxtBtn.addEventListener('click', () => {
+            if (!outputContainer.textContent || outputContainer.textContent.includes('Your generated content')) {
+                showError('No content to export');
+                return;
+            }
+            
+            const blob = new Blob([outputContainer.textContent], {type: 'text/plain'});
+            saveAs(blob, `lessoncraft-${currentContentType}-${Date.now()}.txt`);
+            showNotification('Content saved as text file');
+        });
+        
+        exportPdfBtn.addEventListener('click', () => {
+            if (!outputContainer.textContent || outputContainer.textContent.includes('Your generated content')) {
+                showError('No content to export');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text(`LessonCraft - ${getContentTypeName(currentContentType)}`, 105, 15, null, null, 'center');
+            
+            doc.setFontSize(12);
+            const contentLines = doc.splitTextToSize(outputContainer.textContent, 180);
+            doc.text(contentLines, 15, 25);
+            
+            doc.save(`lessoncraft-${currentContentType}-${Date.now()}.pdf`);
+            showNotification('PDF exported successfully');
+        });
+        
+        exportGoogleBtn.addEventListener('click', () => {
+            showNotification('Google Drive integration would be implemented in production');
+        });
+        
+        // Helper functions
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+        
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function getContentTypeName(type) {
+            const names = {
+                'lesson-plan': 'Lesson Plan',
+                'study-guide': 'Study Guide',
+                'activity-ideas': 'Activity Ideas',
+                'assessment-items': 'Assessment Items'
+            };
+            return names[type] || 'Educational Content';
+        }
+        
+        // Content generation function (simulates API response)
+        function generateEducationalContent(topic, gradeLevel, learningStyle, contentType) {
+            const gradeNames = {
+                'elementary': 'Elementary School',
+                'middle-school': 'Middle School',
+                'high-school': 'High School',
+                'college': 'College'
+            };
+            
+            const styleNames = {
+                'visual': 'Visual',
+                'auditory': 'Auditory',
+                'kinesthetic': 'Kinesthetic',
+                'mixed': 'Mixed'
+            };
+            
+            // Sample content based on type
+            let content = '';
+            
+            switch(contentType) {
+                case 'lesson-plan':
+                    content = `
+                        <h3>Lesson Plan: ${topic}</h3>
+                        <p><strong>Grade Level:</strong> ${gradeNames[gradeLevel]} | <strong>Learning Style:</strong> ${styleNames[learningStyle]}</p>
+                        <hr>
+                        <h4>Learning Objectives</h4>
+                        <ul>
+                            <li>Students will be able to explain the key concepts of ${topic}</li>
+                            <li>Students will demonstrate understanding through hands-on activities</li>
+                            <li>Students will apply knowledge to real-world scenarios</li>
+                        </ul>
+                        
+                        <h4>Materials Needed</h4>
+                        <ul>
+                            <li>Textbook or reference materials</li>
+                            <li>Whiteboard and markers</li>
+                            <li>Worksheets and handouts</li>
+                            <li>Multimedia resources (videos, presentations)</li>
+                        </ul>
+                        
+                        <h4>Lesson Procedure</h4>
+                        <ol>
+                            <li><strong>Introduction (10 mins):</strong> Engage students with a thought-provoking question about ${topic}.</li>
+                            <li><strong>Direct Instruction (20 mins):</strong> Present key concepts using visual aids and examples.</li>
+                            <li><strong>Guided Practice (15 mins):</strong> Students work in pairs to complete exercises.</li>
+                            <li><strong>Independent Practice (20 mins):</strong> Students apply concepts individually.</li>
+                            <li><strong>Assessment (10 mins):</strong> Quick quiz to check understanding.</li>
+                        </ol>
+                        
+                        <h4>Differentiation Strategies</h4>
+                        <ul>
+                            <li>For advanced students: Provide extension activities</li>
+                            <li>For struggling students: Offer simplified materials and one-on-one support</li>
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'study-guide':
+                    content = `
+                        <h3>Study Guide: ${topic}</h3>
+                        <p><strong>Grade Level:</strong> ${gradeNames[gradeLevel]} | <strong>Learning Style:</strong> ${styleNames[learningStyle]}</p>
+                        <hr>
+                        <h4>Key Concepts</h4>
+                        <ul>
+                            <li><strong>Core Principle:</strong> The fundamental idea behind ${topic}</li>
+                            <li><strong>Important Terms:</strong> Definition of key terminology</li>
+                            <li><strong>Historical Context:</strong> Background information</li>
+                            <li><strong>Applications:</strong> How ${topic} is used in the real world</li>
+                        </ul>
+                        
+                        <h4>Visual Summary</h4>
+                        <p>A diagram or flowchart would be shown here to illustrate the main concepts.</p>
+                        
+                        <h4>Practice Questions</h4>
+                        <ol>
+                            <li>What is the main purpose of ${topic}?</li>
+                            <li>Explain how ${topic} relates to [related concept]?</li>
+                            <li>What are the three most important aspects of ${topic}?</li>
+                        </ol>
+                        
+                        <h4>Memory Aids</h4>
+                        <ul>
+                            <li><strong>Acronym:</strong> Create an acronym to remember key points</li>
+                            <li><strong>Mnemonics:</strong> Use memorable phrases</li>
+                            <li><strong>Concept Map:</strong> Visually connect ideas</li>
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'activity-ideas':
+                    content = `
+                        <h3>Activity Ideas: ${topic}</h3>
+                        <p><strong>Grade Level:</strong> ${gradeNames[gradeLevel]} | <strong>Learning Style:</strong> ${styleNames[learningStyle]}</p>
+                        <hr>
+                        
+                        <div style="background: #f1f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4>Activity 1: Concept Mapping</h4>
+                            <p><strong>Objective:</strong> Students create visual representations of ${topic} concepts</p>
+                            <p><strong>Materials:</strong> Large paper, markers, sticky notes</p>
+                            <p><strong>Procedure:</strong> Students work in groups to map out key ideas and their relationships.</p>
+                        </div>
+                        
+                        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4>Activity 2: Role-Play Scenario</h4>
+                            <p><strong>Objective:</strong> Students demonstrate understanding through role-playing</p>
+                            <p><strong>Materials:</strong> Scenario cards, props (optional)</p>
+                            <p><strong>Procedure:</strong> Students act out scenarios that illustrate ${topic} concepts.</p>
+                        </div>
+                        
+                        <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4>Activity 3: Experiment Lab</h4>
+                            <p><strong>Objective:</strong> Students test hypotheses related to ${topic}</p>
+                            <p><strong>Materials:</strong> Lab equipment, worksheets, safety gear</p>
+                            <p><strong>Procedure:</strong> Students conduct hands-on experiments and record observations.</p>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'assessment-items':
+                    content = `
+                        <h3>Assessment: ${topic}</h3>
+                        <p><strong>Grade Level:</strong> ${gradeNames[gradeLevel]} | <strong>Learning Style:</strong> ${styleNames[learningStyle]}</p>
+                        <hr>
+                        
+                        <h4>Multiple Choice Questions</h4>
+                        <ol>
+                            <li>What is the primary function of ${topic}?
+                                <ul>
+                                    <li>A) Option 1</li>
+                                    <li>B) Option 2</li>
+                                    <li>C) Option 3</li>
+                                    <li>D) Option 4</li>
+                                </ul>
+                            </li>
+                            
+                            <li>Which of the following best describes ${topic}?
+                                <ul>
+                                    <li>A) Description 1</li>
+                                    <li>B) Description 2</li>
+                                    <li>C) Description 3</li>
+                                    <li>D) Description 4</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        
+                        <h4>Short Answer Questions</h4>
+                        <ol>
+                            <li>Explain the significance of ${topic} in 2-3 sentences.</li>
+                            <li>Describe how ${topic} relates to [related concept].</li>
+                        </ol>
+                        
+                        <h4>Essay Question</h4>
+                        <p>Analyze the impact of ${topic} on modern society. Consider both positive and negative aspects, and support your arguments with specific examples.</p>
+                        
+                        <h4>Rubric</h4>
+                        <ul>
+                            <li><strong>Understanding (40%):</strong> Accurate explanation of concepts</li>
+                            <li><strong>Analysis (30%):</strong> Depth of critical thinking</li>
+                            <li><strong>Examples (20%):</strong> Use of relevant evidence</li>
+                            <li><strong>Clarity (10%):</strong> Organization and writing quality</li>
+                        </ul>
+                    `;
+                    break;
+            }
+            
+            return content;
+        }
+    </script>
+</body>
+</html>
