@@ -1,17 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+
 import { ResumeForm } from '@/components/resume-form';
 import { ResumePreview } from '@/components/resume-preview';
 import { useResumeData } from '@/hooks/use-resume-data';
+import { useTemplate, type Template } from '@/contexts/template-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-
-type Template = 'classic' | 'modern' | 'creative';
 
 const templatePreviews = {
   classic: '/images/template-classic.png',
@@ -22,7 +21,12 @@ const templatePreviews = {
 
 export function ResumeBuilder() {
   const { resumeData, updateResumeData, isLoaded, resetResumeData } = useResumeData();
-  const [template, setTemplate] = useState<Template>('classic');
+  const { template, setTemplate } = useTemplate();
+  
+  console.log('ResumeBuilder - Current template:', template);
+  console.log('ResumeBuilder - Template type:', typeof template);
+  console.log('ResumeBuilder - Is creative?', template === 'creative');
+  console.log('ResumeBuilder - About to render ResumePreview with template:', template);
 
   if (!isLoaded) {
     return (
@@ -49,8 +53,11 @@ export function ResumeBuilder() {
           </CardHeader>
           <CardContent>
             <RadioGroup 
-              defaultValue="classic" 
-              onValueChange={(value: Template) => setTemplate(value)} 
+              value={template}
+              onValueChange={(value: Template) => {
+                console.log('RadioGroup - Template changing from', template, 'to', value);
+                setTemplate(value);
+              }} 
               className="grid grid-cols-2 sm:grid-cols-3 gap-4"
             >
               {(['classic', 'modern', 'creative'] as Template[]).map((t) => (

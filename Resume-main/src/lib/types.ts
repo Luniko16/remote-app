@@ -38,6 +38,16 @@ export const ProjectSchema = z.object({
   url: z.string().url({ message: "Invalid URL" }).or(z.literal('')).default(''),
 });
 
+export const ReferenceSchema = z.object({
+  id: z.string().default(() => crypto.randomUUID()),
+  name: z.string().default(''),
+  title: z.string().default(''),
+  company: z.string().default(''),
+  email: z.string().email({ message: "Invalid email address" }).or(z.literal('')).default(''),
+  phone: z.string().default(''),
+  relationship: z.string().default(''),
+});
+
 export const ResumeDataSchema = z.object({
   personalInfo: PersonalInfoSchema.default({}),
   summary: z.string().default(''),
@@ -45,6 +55,7 @@ export const ResumeDataSchema = z.object({
   education: z.array(EducationSchema).default([]),
   skills: z.array(SkillSchema).default([]),
   projects: z.array(ProjectSchema).default([]),
+  references: z.array(ReferenceSchema).default([]),
 });
 
 export type PersonalInfo = z.infer<typeof PersonalInfoSchema>;
@@ -52,4 +63,5 @@ export type Experience = z.infer<typeof ExperienceSchema>;
 export type Education = z.infer<typeof EducationSchema>;
 export type Skill = z.infer<typeof SkillSchema>;
 export type Project = z.infer<typeof ProjectSchema>;
+export type Reference = z.infer<typeof ReferenceSchema>;
 export type ResumeData = z.infer<typeof ResumeDataSchema>;

@@ -9,31 +9,45 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast';
-import { generateTextBasedPDF } from '@/lib/pdf-generator';
+import { generateTextBasedPDF, generateHTMLToPDF } from '@/lib/pdf-generator';
 import { useResumeData } from '@/hooks/use-resume-data';
+import { useTemplate } from '@/contexts/template-context';
 import { useState } from 'react';
 
 export function Header() {
   const { toast } = useToast();
   const { resumeData } = useResumeData();
+  const { template } = useTemplate();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handlePDFExport = async () => {
     setIsGeneratingPDF(true);
     try {
-      await generateTextBasedPDF(resumeData, 'resume.pdf');
+      const filename = `${resumeData.personalInfo.name || 'resume'}-${template}.pdf`;
+      // Try text-based PDF first (creates selectable text)
+      await generateTextBasedPDF(resumeData, filename, template);
       
       toast({
         title: "Success!",
-        description: "Your resume has been exported as a text-based PDF.",
+        description: "Your resume has been exported as a PDF with selectable text.",
       });
     } catch (error) {
-      console.error('PDF generation failed:', error);
-      toast({
-        title: "Export Failed",
-        description: "There was an error generating your PDF. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Text-based PDF failed, trying HTML-to-PDF:', error);
+      try {
+        const filename = `${resumeData.personalInfo.name || 'resume'}-${template}.pdf`;
+        await generateHTMLToPDF(resumeData, filename, template);
+        toast({
+          title: "Success!",
+          description: "Your resume has been exported as a PDF (image-based).",
+        });
+      } catch (fallbackError) {
+        console.error('Both PDF generation methods failed:', fallbackError);
+        toast({
+          title: "Export Failed",
+          description: "There was an error generating your PDF. Please check the console and try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGeneratingPDF(false);
     }

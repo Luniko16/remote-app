@@ -7,12 +7,13 @@ import { initialResumeData } from '@/lib/data';
 const STORAGE_KEY = 'resumai-data';
 
 const emptyResumeData: ResumeData = {
-  personalInfo: { name: '', email: '', phone: '', location: '', website: '' },
+  personalInfo: { name: '', email: '', phone: '', location: '', website: '', linkedin: '' },
   summary: '',
   experience: [],
   education: [],
   skills: [],
   projects: [],
+  references: [],
 };
 
 export function useResumeData() {

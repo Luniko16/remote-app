@@ -13,7 +13,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode, className?: 
 );
 
 export default function ModernTemplate({ data }: TemplateProps) {
-  const { personalInfo, summary, experience, education, skills, projects } = data;
+  const { personalInfo, summary, experience, education, skills, projects, references } = data;
 
   return (
     <div className="font-body bg-white text-gray-800 h-full flex">
@@ -91,6 +91,35 @@ export default function ModernTemplate({ data }: TemplateProps) {
                 <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
                   {proj.description.split('\n').map((line, i) => line && <li key={i}>{line.replace(/^- /, '')}</li>)}
                 </ul>
+              </div>
+            ))}
+          </Section>
+        )}
+
+        {references.length > 0 && (
+          <Section title="References">
+            {references.map(ref => (
+              <div key={ref.id} className="mb-4 p-3 bg-gray-50 rounded border">
+                <h3 className="text-sm font-bold text-gray-800">{ref.name}</h3>
+                <p className="text-xs font-semibold text-gray-700">{ref.title}</p>
+                <p className="text-xs text-gray-600 mb-1">{ref.company}</p>
+                {ref.relationship && (
+                  <p className="text-xs text-gray-500 italic mb-2">{ref.relationship}</p>
+                )}
+                <div className="space-y-1">
+                  {ref.email && (
+                    <p className="flex items-center gap-1 text-xs text-gray-600">
+                      <Mail className="w-3 h-3 text-accent" />
+                      {ref.email}
+                    </p>
+                  )}
+                  {ref.phone && (
+                    <p className="flex items-center gap-1 text-xs text-gray-600">
+                      <Phone className="w-3 h-3 text-accent" />
+                      {ref.phone}
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </Section>

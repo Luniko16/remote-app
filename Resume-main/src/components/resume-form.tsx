@@ -20,7 +20,8 @@ import {
   Sparkles,
   RotateCcw,
   BookUser,
-  Lightbulb
+  Lightbulb,
+  Users
 } from 'lucide-react';
 import type { ResumeData } from '@/lib/types';
 import { PersonalInfoForm } from './forms/personal-info-form';
@@ -29,6 +30,7 @@ import { ExperienceForm } from './forms/experience-form';
 import { EducationForm } from './forms/education-form';
 import { SkillsForm } from './forms/skills-form';
 import { ProjectForm } from './forms/project-form';
+import { ReferencesForm } from './forms/references-form';
 
 type ResumeFormProps = {
   resumeData: ResumeData;
@@ -39,13 +41,14 @@ type ResumeFormProps = {
 export function ResumeForm({ resumeData, updateResumeData, resetResumeData }: ResumeFormProps) {
     return (
         <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto flex-wrap sm:h-10">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 h-auto flex-wrap sm:h-10">
                 <TabsTrigger value="personal"><User className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Personal</span></TabsTrigger>
                 <TabsTrigger value="summary"><BookUser className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Summary</span></TabsTrigger>
                 <TabsTrigger value="experience"><Briefcase className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Experience</span></TabsTrigger>
                 <TabsTrigger value="education"><GraduationCap className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Education</span></TabsTrigger>
                 <TabsTrigger value="skills"><Sparkles className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Skills</span></TabsTrigger>
                 <TabsTrigger value="projects"><Lightbulb className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Projects</span></TabsTrigger>
+                <TabsTrigger value="references"><Users className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">References</span></TabsTrigger>
             </TabsList>
             <TabsContent value="personal">
                 <PersonalInfoForm personalInfo={resumeData.personalInfo} updateResumeData={updateResumeData} />
@@ -64,6 +67,9 @@ export function ResumeForm({ resumeData, updateResumeData, resetResumeData }: Re
             </TabsContent>
             <TabsContent value="projects">
                 <ProjectForm projects={resumeData.projects} updateResumeData={updateResumeData} />
+            </TabsContent>
+            <TabsContent value="references">
+                <ReferencesForm references={resumeData.references} updateResumeData={updateResumeData} />
             </TabsContent>
 
             <Card className="mt-6 border-destructive/50">

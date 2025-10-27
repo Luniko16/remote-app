@@ -52,4 +52,15 @@ export const initialResumeData: ResumeData = {
       url: 'https://github.com/your-name/project-alpha',
     },
   ],
+  references: [
+    {
+      id: 'ref1',
+      name: 'Jane Smith',
+      title: 'Senior Engineering Manager',
+      company: 'Innovate Corp',
+      email: 'jane.smith@innovatecorp.com',
+      phone: '(555) 123-4567',
+      relationship: 'Former supervisor',
+    },
+  ],
 };

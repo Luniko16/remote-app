@@ -5,54 +5,55 @@ type TemplateProps = {
   data: ResumeData;
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode, className?: string }> = ({ title, children, className }) => (
-  <section className={`mb-6 ${className}`}>
-    <h2 className="font-headline text-2xl font-bold text-gray-800 mb-3 relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-12 after:h-0.5 after:bg-primary">{title}</h2>
-    {children}
-  </section>
-);
+
 
 export default function CreativeTemplate({ data }: TemplateProps) {
-  const { personalInfo, summary, experience, education, skills, projects } = data;
+  const { personalInfo, summary, experience, education, skills, projects, references } = data;
+
+  // Add debug logging to ensure this component is being called
+  console.log('🎨 CreativeTemplate component is rendering!');
 
   return (
-    <div className="font-body bg-white text-gray-700 h-full flex">
-      {/* Sidebar Header */}
-      <div className="w-[35%] bg-primary/10 p-8 flex flex-col">
-        <header className="mt-8 mb-auto">
-          <h1 className="font-headline text-5xl font-extrabold text-primary leading-tight tracking-tight">{personalInfo.name || 'Your Name'}</h1>
-          <h2 className="font-headline text-lg text-gray-600 mt-2">{experience[0]?.role || 'Professional Title'}</h2>
+    <div className="font-body bg-white text-gray-700 h-full flex" style={{ minHeight: '100%' }}>
+      {/* Left Sidebar - Creative Template Signature */}
+      <div className="w-[35%] bg-gray-50 p-8 flex flex-col border-r-2 border-gray-200">
+        <header className="mb-8">
+          <h1 className="font-headline text-4xl font-extrabold text-gray-900 leading-tight tracking-tight mb-4">
+            {personalInfo.name || 'Your Name'}
+          </h1>
         </header>
 
-        <div className="space-y-6 mt-auto">
+        <div className="space-y-8">
           <section>
-            <h3 className="font-headline text-lg font-bold text-primary mb-2">Contact</h3>
-            <div className="space-y-1.5 text-xs text-gray-600">
-              {personalInfo.email && <p className="flex items-center gap-2"><Mail size={14} />{personalInfo.email}</p>}
-              {personalInfo.phone && <p className="flex items-center gap-2"><Phone size={14} />{personalInfo.phone}</p>}
-              {personalInfo.location && <p className="flex items-center gap-2"><MapPin size={14} />{personalInfo.location}</p>}
-              {personalInfo.linkedin && <p className="flex items-center gap-2"><Linkedin size={14} />{personalInfo.linkedin}</p>}
-              {personalInfo.website && <p className="flex items-center gap-2"><Globe size={14} />{personalInfo.website}</p>}
+            <h3 className="font-headline text-lg font-bold text-teal-600 mb-4 uppercase tracking-wide">CONTACT</h3>
+            <div className="space-y-3 text-sm text-gray-700">
+              {personalInfo.email && <p className="flex items-center gap-3"><Mail size={16} className="text-teal-600" />{personalInfo.email}</p>}
+              {personalInfo.phone && <p className="flex items-center gap-3"><Phone size={16} className="text-teal-600" />{personalInfo.phone}</p>}
+              {personalInfo.location && <p className="flex items-center gap-3"><MapPin size={16} className="text-teal-600" />{personalInfo.location}</p>}
+              {personalInfo.linkedin && <p className="flex items-center gap-3"><Linkedin size={16} className="text-teal-600" />{personalInfo.linkedin}</p>}
+              {personalInfo.website && <p className="flex items-center gap-3"><Globe size={16} className="text-teal-600" />{personalInfo.website}</p>}
             </div>
           </section>
 
           {skills.length > 0 && (
             <section>
-              <h3 className="font-headline text-lg font-bold text-primary mb-2">Skills</h3>
-              <div className="flex flex-wrap gap-x-3 gap-y-1.5">
-                {skills.map(skill => <span key={skill.id} className="text-sm">{skill.name}</span>)}
+              <h3 className="font-headline text-lg font-bold text-teal-600 mb-4 uppercase tracking-wide">SKILLS</h3>
+              <div className="space-y-2">
+                {skills.map(skill => (
+                  <div key={skill.id} className="text-sm text-gray-700">{skill.name}</div>
+                ))}
               </div>
             </section>
           )}
 
            {education.length > 0 && (
             <section>
-              <h3 className="font-headline text-lg font-bold text-primary mb-2">Education</h3>
+              <h3 className="font-headline text-lg font-bold text-teal-600 mb-4 uppercase tracking-wide">EDUCATION</h3>
               {education.map(edu => (
-                <div key={edu.id} className="mb-3">
-                  <h3 className="text-sm font-bold text-gray-800">{edu.degree}</h3>
-                  <p className="text-xs italic text-gray-600">{edu.institution}</p>
-                  <p className="text-xs text-gray-500">{edu.endDate}</p>
+                <div key={edu.id} className="mb-4">
+                  <h4 className="text-sm font-bold text-gray-800">{edu.degree}</h4>
+                  <p className="text-sm text-gray-600">{edu.institution}</p>
+                  <p className="text-xs text-gray-500">{edu.startDate} - {edu.endDate || 'Present'}</p>
                 </div>
               ))}
             </section>
@@ -64,42 +65,81 @@ export default function CreativeTemplate({ data }: TemplateProps) {
       {/* Main Content */}
       <div className="w-[65%] p-8 overflow-y-auto">
         {summary && (
-          <Section title="Profile">
-            <p className="text-sm leading-relaxed">{summary}</p>
-          </Section>
+          <section className="mb-8">
+            <h2 className="font-headline text-xl font-bold text-teal-600 mb-4 uppercase tracking-wide">SUMMARY</h2>
+            <p className="text-sm leading-relaxed text-gray-700">{summary}</p>
+          </section>
         )}
 
         {experience.length > 0 && (
-          <Section title="Experience">
+          <section className="mb-8">
+            <h2 className="font-headline text-xl font-bold text-teal-600 mb-4 uppercase tracking-wide">EXPERIENCE</h2>
             {experience.map(exp => (
-              <div key={exp.id} className="mb-4">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-base font-bold text-gray-800">{exp.company}</h3>
-                  <p className="text-xs font-medium text-gray-500">{exp.startDate} - {exp.endDate}</p>
+              <div key={exp.id} className="mb-6">
+                <div className="flex justify-between items-baseline mb-2">
+                  <h3 className="text-lg font-bold text-gray-900">{exp.role}</h3>
+                  <p className="text-sm font-medium text-gray-500">{exp.startDate} - {exp.endDate || 'Present'}</p>
                 </div>
-                <p className="text-sm font-semibold italic text-primary mb-1">{exp.role}</p>
-                <ul className="list-disc pl-5 text-sm space-y-1 leading-relaxed">
-                  {exp.description.split('\n').map((line, i) => line && <li key={i}>{line.replace(/^- /, '')}</li>)}
-                </ul>
+                <p className="text-base font-medium text-gray-700 mb-3 italic">{exp.company}</p>
+                <div className="text-sm text-gray-700 leading-relaxed">
+                  {exp.description.split('\n').map((line, i) => 
+                    line && <p key={i} className="mb-1">• {line.replace(/^- /, '')}</p>
+                  )}
+                </div>
               </div>
             ))}
-          </Section>
+          </section>
         )}
         
         {projects.length > 0 && (
-          <Section title="Projects">
+          <section className="mb-8">
+            <h2 className="font-headline text-xl font-bold text-teal-600 mb-4 uppercase tracking-wide">PROJECTS</h2>
             {projects.map(proj => (
-              <div key={proj.id} className="mb-4">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-base font-bold text-gray-800">{proj.name}</h3>
-                  {proj.url && <a href={proj.url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-primary hover:underline flex items-center gap-1"><LinkIcon size={12} />Link</a>}
+              <div key={proj.id} className="mb-6">
+                <div className="flex justify-between items-baseline mb-2">
+                  <h3 className="text-lg font-bold text-gray-900">{proj.name}</h3>
+                  {proj.url && <a href={proj.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-teal-600 hover:underline flex items-center gap-1"><LinkIcon size={12} />Link</a>}
                 </div>
-                <ul className="list-disc pl-5 text-sm space-y-1 leading-relaxed">
-                  {proj.description.split('\n').map((line, i) => line && <li key={i}>{line.replace(/^- /, '')}</li>)}
-                </ul>
+                <div className="text-sm text-gray-700 leading-relaxed">
+                  {proj.description.split('\n').map((line, i) => 
+                    line && <p key={i} className="mb-1">• {line.replace(/^- /, '')}</p>
+                  )}
+                </div>
               </div>
             ))}
-          </Section>
+          </section>
+        )}
+
+        {references.length > 0 && (
+          <section className="mb-8">
+            <h2 className="font-headline text-xl font-bold text-teal-600 mb-4 uppercase tracking-wide">REFERENCES</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {references.map(ref => (
+                <div key={ref.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 className="text-base font-bold text-gray-900 mb-1">{ref.name}</h3>
+                  <p className="text-sm font-medium text-teal-600 mb-1">{ref.title}</p>
+                  <p className="text-sm text-gray-700 mb-2">{ref.company}</p>
+                  {ref.relationship && (
+                    <p className="text-xs text-gray-600 mb-2 italic">{ref.relationship}</p>
+                  )}
+                  <div className="space-y-1 text-xs text-gray-600">
+                    {ref.email && (
+                      <div className="flex items-center gap-2">
+                        <Mail size={12} className="text-teal-600" />
+                        <span>{ref.email}</span>
+                      </div>
+                    )}
+                    {ref.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone size={12} className="text-teal-600" />
+                        <span>{ref.phone}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>
