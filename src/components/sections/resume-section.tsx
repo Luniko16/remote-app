@@ -1,0 +1,171 @@
+
+"use client";
+
+import { Button } from '@/components/ui/button';
+import { resume } from '@/lib/data';
+import { Download, Award, Trophy, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
+import { useToast } from '@/hooks/use-toast';
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-3xl md:text-4xl font-bold text-primary mb-12 text-center">{children}</h2>;
+}
+
+function SubsectionTitle({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-2xl md:text-3xl font-bold text-primary mb-8 text-center">{children}</h3>;
+}
+
+export function ResumeSection() {
+  const { theme } = useTheme();
+  const [title, setTitle] = useState("My Journey");
+  const [isGamer, setIsGamer] = useState(false);
+  const [isProfessional, setIsProfessional] = useState(false);
+  const [ref, isIntersecting] = useIntersectionObserver({ threshold: 0.1 });
+  const { toast } = useToast();
+  const [achievementUnlocked, setAchievementUnlocked] = useState(false);
+
+  useEffect(() => {
+    const gamer = theme === 'gamer';
+    const professional = theme === 'professional';
+    setIsGamer(gamer);
+    setIsProfessional(professional);
+    setTitle(gamer ? "Character Sheet" : "My Journey");
+  }, [theme]);
+
+  useEffect(() => {
+    if (isIntersecting && isGamer && !achievementUnlocked) {
+      toast({
+        title: "🏆 Achievement Unlocked!",
+        description: "Opened the Character Sheet.",
+        variant: 'gamer',
+        duration: 3000,
+      });
+      setAchievementUnlocked(true);
+    }
+  }, [isIntersecting, isGamer, achievementUnlocked, toast]);
+
+  return (
+    <section 
+      id="resume" 
+      ref={ref}
+      className={cn(
+        "py-16 md:py-24 bg-transparent",
+        !isProfessional && isIntersecting && "animate-fade-in-up opacity-0",
+        isProfessional && "opacity-100"
+      )}
+    >
+      <div className="container max-w-6xl mx-auto">
+        <SectionTitle>{title}</SectionTitle>
+        
+        {/* Education Section */}
+        <div className="mb-20">
+          <SubsectionTitle>{isGamer ? "Training Grounds" : "Education"}</SubsectionTitle>
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-8 relative border-l-2 border-accent/30 pl-8">
+              {resume.education.map((edu, index) => (
+                <div 
+                  key={index} 
+                  className={cn(
+                    "relative",
+                    isProfessional && isIntersecting && "animate-fade-in-up opacity-0"
+                  )}
+                  style={{ animationDelay: isProfessional ? `${index * 200}ms` : '0ms' }}
+                >
+                  <div className="absolute -left-[42px] top-1.5 h-4 w-4 rounded-full bg-accent" />
+                  <p className="font-semibold text-xl">{edu.degree}</p>
+                  <p className="text-muted-foreground text-lg">{edu.institution}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{edu.period}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Work Experience Section */}
+        <div className="mb-20">
+          <SubsectionTitle>{isGamer ? "Quest Log" : "Work Experience"}</SubsectionTitle>
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-8 relative border-l-2 border-accent/30 pl-8">
+              {resume.workExperience.map((work, index) => (
+                <div 
+                  key={index} 
+                  className={cn(
+                    "relative",
+                     isProfessional && isIntersecting && "animate-fade-in-left opacity-0"
+                  )}
+                  style={{ animationDelay: isProfessional ? `${(resume.education.length + index) * 200}ms` : '0ms' }}
+                >
+                  <div className="absolute -left-[42px] top-1.5 h-4 w-4 rounded-full bg-accent" />
+                  <p className="font-semibold text-xl">{work.role}</p>
+                  <p className="text-muted-foreground text-lg">{work.company}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{work.period}</p>
+                  <p className="mt-3 text-base leading-relaxed">{work.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Certificates Section */}
+        <div className="mb-16">
+          <SubsectionTitle>{isGamer ? 'Achievements Unlocked' : 'Certificates'}</SubsectionTitle>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {resume.certificates.map((cert, index) => (
+              <Link
+                key={index}
+                href={cert.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "group overflow-hidden rounded-lg transition-all duration-300",
+                  isGamer ? 'card-glowing-border hover:scale-105' : 'border bg-card hover:shadow-xl hover:-translate-y-2'
+                )}
+              >
+                <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                  <Image
+                    src={(cert as any).coverImage || cert.url}
+                    alt={cert.name}
+                    fill
+                    className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                    <ExternalLink className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+                <div className="p-4">
+                  {isGamer ? (
+                    <>
+                      <p className="font-semibold text-base mb-1">{`🏆 ${cert.name}`}</p>
+                      <p className="text-muted-foreground text-sm">{cert.issuer}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{cert.date}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-base mb-1">{cert.name}</p>
+                      <p className="text-muted-foreground text-sm">{cert.issuer}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{cert.date}</p>
+                    </>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center mt-16">
+          <Button asChild size="lg">
+            <Link href="/Ntsika's CV.pdf" target="_blank" download>
+              <Download className="mr-2 h-5 w-5" />
+              Download My Resume
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}

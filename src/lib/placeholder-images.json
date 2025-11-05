@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "profile",
+      "description": "A profile picture of Ntsika.",
+      "imageUrl": "/Ntsika2.jpeg",
+      "imageHint": "profile picture"
+    },
+    {
+      "id": "project1",
+      "description": "AI-powered resume builder application",
+      "imageUrl": "/AI resume.jpeg",
+      "imageHint": "resume builder"
+    },
+    {
+      "id": "project2",
+      "description": "Crop disease detection application",
+      "imageUrl": "/crop disease detection.jpeg",
+      "imageHint": "crop disease"
+    },
+    {
+      "id": "project3",
+      "description": "AI-powered chatbot application",
+      "imageUrl": "/AI chatbot.jpeg",
+      "imageHint": "chatbot interface"
+    },
+    {
+      "id": "project4",
+      "description": "AI-powered content creator",
+      "imageUrl": "/Content creator.jpeg",
+      "imageHint": "writing tool"
+    }
+  ]
+}
