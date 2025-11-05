@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
+import { TemplateProvider } from '@/contexts/template-context';
 import { GamerBackground } from '@/components/gamer-background';
 import { CursorTrail } from '@/components/cursor-trail';
 import React, { useEffect, useState } from 'react';
@@ -52,13 +53,15 @@ export default function RootLayout({
           enableSystem={false}
           themes={['professional', 'gamer', 'dark']}
         >
-          <ParallaxBackground />
-          <GamerBackground />
-          <CursorTrail />
-          <div className="relative z-10">
-            {children}
-          </div>
-          <Toaster />
+          <TemplateProvider>
+            <ParallaxBackground />
+            <GamerBackground />
+            <CursorTrail />
+            <div className="relative z-10">
+              {children}
+            </div>
+            <Toaster />
+          </TemplateProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -188,4 +188,30 @@ export const resume = {
       coverImage: '/Python cover.jpg',
     },
   ],
+  references: [
+    {
+      name: 'Dr. Sarah Johnson',
+      title: 'Senior IT Manager',
+      company: 'TechCorp Solutions',
+      relationship: 'Former Supervisor',
+      email: 'sarah.johnson@techcorp.com',
+      phone: '+27 11 123 4567',
+    },
+    {
+      name: 'Michael Chen',
+      title: 'Network Administrator',
+      company: 'Digital Innovations Ltd',
+      relationship: 'Colleague & Mentor',
+      email: 'michael.chen@digitalinnovations.co.za',
+      phone: '+27 21 987 6543',
+    },
+    {
+      name: 'Prof. Amanda Williams',
+      title: 'Head of ICT Department',
+      company: 'Walter Sisulu University',
+      relationship: 'Academic Supervisor',
+      email: 'a.williams@wsu.ac.za',
+      phone: '+27 43 702 9000',
+    },
+  ],
 };

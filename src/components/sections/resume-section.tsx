@@ -11,6 +11,10 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
 import { useToast } from '@/hooks/use-toast';
+import { generateHTMLToPDF } from '@/lib/pdf-generator';
+import type { ResumeData } from '@/lib/types';
+import { useTemplate } from '@/contexts/template-context';
+import { TemplateSelector } from '@/components/template-selector';
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-3xl md:text-4xl font-bold text-primary mb-12 text-center">{children}</h2>;
@@ -22,12 +26,14 @@ function SubsectionTitle({ children }: { children: React.ReactNode }) {
 
 export function ResumeSection() {
   const { theme } = useTheme();
+  const { template } = useTemplate();
   const [title, setTitle] = useState("My Journey");
   const [isGamer, setIsGamer] = useState(false);
   const [isProfessional, setIsProfessional] = useState(false);
   const [ref, isIntersecting] = useIntersectionObserver({ threshold: 0.1 });
   const { toast } = useToast();
   const [achievementUnlocked, setAchievementUnlocked] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     const gamer = theme === 'gamer';
@@ -48,6 +54,96 @@ export function ResumeSection() {
       setAchievementUnlocked(true);
     }
   }, [isIntersecting, isGamer, achievementUnlocked, toast]);
+
+  // Convert resume data to ResumeData format
+  const getResumeData = (): ResumeData => {
+    return {
+      personalInfo: {
+        name: "Ntsika Mtshixa",
+        email: "ntsikamtshixa@gmail.com",
+        phone: "+27 73 123 4567",
+        location: "Cape Town, South Africa",
+        linkedin: "linkedin.com/in/ntsika-mtshixa",
+        website: "ntsikamtshixa.dev"
+      },
+      summary: "Passionate software developer and AI enthusiast with expertise in full-stack development, machine learning, and modern web technologies. Experienced in building scalable applications and implementing AI solutions.",
+      experience: resume.workExperience.map((work, index) => ({
+        id: `exp-${index}`,
+        role: work.role,
+        company: work.company,
+        startDate: work.period.split(' - ')[0],
+        endDate: work.period.split(' - ')[1] || 'Present',
+        description: work.description
+      })),
+      education: resume.education.map((edu, index) => ({
+        id: `edu-${index}`,
+        degree: edu.degree,
+        institution: edu.institution,
+        startDate: edu.period.split(' - ')[0],
+        endDate: edu.period.split(' - ')[1] || 'Present'
+      })),
+      skills: [
+        { id: 'skill-1', name: 'JavaScript/TypeScript' },
+        { id: 'skill-2', name: 'React/Next.js' },
+        { id: 'skill-3', name: 'Node.js' },
+        { id: 'skill-4', name: 'Python' },
+        { id: 'skill-5', name: 'Machine Learning' },
+        { id: 'skill-6', name: 'AI/LLMs' },
+        { id: 'skill-7', name: 'Database Design' },
+        { id: 'skill-8', name: 'Cloud Computing' }
+      ],
+      projects: [
+        {
+          id: 'proj-1',
+          name: 'AI Resume Builder',
+          description: 'Full-stack application for generating professional resumes using AI technology',
+          url: 'https://github.com/ntsika-mtshixa/resume-builder'
+        },
+        {
+          id: 'proj-2',
+          name: 'Crop Disease Detection',
+          description: 'Machine learning model for detecting plant diseases using computer vision',
+          url: 'https://github.com/ntsika-mtshixa/crop-disease-detection'
+        }
+      ],
+      references: []
+    };
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      setIsGeneratingPDF(true);
+      
+      console.log('PDF Download - Current template:', template);
+      
+      toast({
+        title: "Generating PDF...",
+        description: `Creating your resume with ${template} template`,
+        duration: 2000,
+      });
+
+      const resumeData = getResumeData();
+      
+      // Use the enhanced jsPDF method (no html2canvas)
+      await generateHTMLToPDF(resumeData, 'Ntsika_Mtshixa_Resume.pdf', template);
+      
+      toast({
+        title: "✅ PDF Generated!",
+        description: `Your ${template} template resume has been downloaded successfully`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast({
+        title: "❌ PDF Generation Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   return (
     <section 
@@ -158,11 +254,21 @@ export function ResumeSection() {
         </div>
 
         <div className="text-center mt-16">
-          <Button asChild size="lg">
-            <Link href="/Ntsika's CV.pdf" target="_blank" download>
-              <Download className="mr-2 h-5 w-5" />
-              Download My Resume
-            </Link>
+          <TemplateSelector />
+          <Button 
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            size="lg"
+            className={cn(
+              "transition-all duration-300",
+              isGeneratingPDF && "opacity-70 cursor-not-allowed"
+            )}
+          >
+            <Download className={cn(
+              "mr-2 h-5 w-5",
+              isGeneratingPDF && "animate-spin"
+            )} />
+            {isGeneratingPDF ? "Generating PDF..." : "Download My Resume"}
           </Button>
         </div>
       </div>

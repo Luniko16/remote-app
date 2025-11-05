@@ -46,10 +46,20 @@ export function ResumeBuilder() {
   return (
     <div className="grid grid-cols-1 items-start gap-8 p-4 md:container md:mx-auto md:max-w-7xl md:grid-cols-[1fr_auto] md:p-6">
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">Choose Your Template</CardTitle>
-            <CardDescription>Select a template to instantly change your resume's look.</CardDescription>
+        <Card className="relative overflow-hidden border-2 border-gradient-to-r from-purple-200 to-cyan-200">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-50/50 to-cyan-50/50" />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">1</span>
+              </div>
+              <div>
+                <CardTitle className="font-headline text-xl bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                  Choose Your Template
+                </CardTitle>
+                <CardDescription>Select a template to instantly change your resume's look and unlock new possibilities!</CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <RadioGroup 

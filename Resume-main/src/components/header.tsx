@@ -64,10 +64,17 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
-          <FileText className="h-7 w-7 text-primary" />
-          <h1 className="font-headline text-3xl font-bold tracking-wide text-foreground">
+          <div className="relative">
+            <FileText className="h-7 w-7 text-primary animate-pulse" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-lg blur opacity-50 animate-pulse" />
+          </div>
+          <h1 className="font-headline text-3xl font-bold tracking-wide bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
             ResumAI
           </h1>
+          <div className="hidden md:flex items-center gap-2 ml-4">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-xs text-muted-foreground">Game Mode Active</span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
