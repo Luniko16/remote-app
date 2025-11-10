@@ -63,7 +63,7 @@ export function ResumeSection() {
 
       // Create a link element to download the static PDF
       const link = document.createElement('a');
-      link.href = '/Ntsika Mtshixa .pdf';
+      link.href = '/Ntsika Mtshixa.pdf';
       link.download = 'Ntsika_Mtshixa_CV.pdf';
       document.body.appendChild(link);
       link.click();
