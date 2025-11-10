@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { resume } from '@/lib/data';
-import { Download, Award, Trophy, ExternalLink, Mail, Phone, User } from 'lucide-react';
+import { Download, Award, Trophy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
@@ -192,78 +192,6 @@ export function ResumeSection() {
                 </div>
               </Link>
             ))}
-          </div>
-        </div>
-
-        {/* References Section */}
-        <div className="mb-16">
-          <SubsectionTitle>{isGamer ? 'Guild Members' : 'References'}</SubsectionTitle>
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {resume.references.map((ref, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "p-6 rounded-lg transition-all duration-300 relative overflow-hidden",
-                  isGamer ? 'card-glowing-border hover:scale-105' : 'border bg-card hover:shadow-xl hover:-translate-y-2',
-                  isProfessional && isIntersecting && "animate-fade-in-up opacity-0"
-                )}
-                style={{ animationDelay: isProfessional ? `${(resume.education.length + resume.workExperience.length + resume.certificates.length + index) * 200}ms` : '0ms' }}
-              >
-                <div className="flex items-start space-x-3 mb-4">
-                  <div className={cn(
-                    "p-2 rounded-full flex-shrink-0",
-                    isGamer ? 'bg-accent/20' : 'bg-primary/10'
-                  )}>
-                    <User className={cn(
-                      "w-5 h-5",
-                      isGamer ? 'text-accent' : 'text-primary'
-                    )} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-lg mb-1 truncate">
-                      {isGamer ? `👤 ${ref.name}` : ref.name}
-                    </h4>
-                    <p className="text-primary font-medium text-sm truncate">{ref.title}</p>
-                    <p className="text-muted-foreground text-sm truncate">{ref.company}</p>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full inline-block">
-                    {ref.relationship}
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <a
-                      href={`mailto:${ref.email}`}
-                      className="text-primary hover:underline truncate min-w-0"
-                      title={ref.email}
-                    >
-                      {ref.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <a
-                      href={`tel:${ref.phone}`}
-                      className="text-primary hover:underline"
-                    >
-                      {ref.phone}
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* References Note */}
-          <div className="text-center mt-8">
-            <p className="text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-lg inline-block">
-              {isGamer ? '🔒 Additional references available upon request' : 'Additional references available upon request'}
-            </p>
           </div>
         </div>
 
