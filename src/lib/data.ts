@@ -101,7 +101,7 @@ export const projects = [
     title: 'AI-Powered Resume Builder',
     description: 'A smart resume builder that uses AI to help users create professional resumes tailored to job descriptions.',
     imageUrlId: 'project1',
-    liveDemoUrl: 'https://carretnet.netlify.app',
+    liveDemoUrl: 'https://ai-resume.vercel.app',
     repoUrl: '#',
     status: 'Completed',
   },
