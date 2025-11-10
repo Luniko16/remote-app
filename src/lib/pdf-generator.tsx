@@ -1,10 +1,608 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 import type { ResumeData } from './types';
+import type { Template } from '@/contexts/template-context';
 
-export type Template = 'classic' | 'modern' | 'creative';
+// Template-specific styles
+const getTemplateStyles = (template: Template = 'classic') => {
+  const baseStyles = {
+    page: {
+      flexDirection: 'column' as const,
+      backgroundColor: '#ffffff',
+      padding: 30,
+      fontFamily: 'Helvetica',
+      fontSize: 12, // Increased from 11
+      lineHeight: 1.5, // Increased from 1.4
+    },
+  };
 
-// Enhanced HTML-to-PDF generation with selectable text (NO html2canvas)
+  switch (template) {
+    case 'modern':
+      return {
+        ...baseStyles,
+        page: { ...baseStyles.page, padding: 35, fontSize: 11 } // Increased from 10
+      };
+    case 'creative':
+      return {
+        ...baseStyles,
+        page: { ...baseStyles.page, padding: 25, fontSize: 13 } // Increased from 12
+      };
+    default: // classic
+      return baseStyles;
+  }
+};
+
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    backgroundColor: '#ffffff',
+    padding: 30,
+    fontFamily: 'Helvetica',
+    fontSize: 12, // Increased from 11
+    lineHeight: 1.5, // Increased from 1.4
+  },
+  header: {
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  name: {
+    fontSize: 28, // Increased from 24
+    fontWeight: 'bold',
+    marginBottom: 8, // Increased from 5
+    color: '#1f2937',
+  },
+  contactInfo: {
+    fontSize: 11, // Increased from 10
+    color: '#6b7280',
+    marginBottom: 4, // Increased from 3
+  },
+  section: {
+    marginBottom: 18, // Increased from 15
+  },
+  sectionTitle: {
+    fontSize: 16, // Increased from 14
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 10, // Increased from 8
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    paddingBottom: 3, // Increased from 2
+  },
+  summary: {
+    fontSize: 12, // Increased from 11
+    lineHeight: 1.6, // Increased from 1.5
+    color: '#374151',
+    textAlign: 'justify',
+  },
+  experienceItem: {
+    marginBottom: 15, // Increased from 12
+  },
+  jobTitle: {
+    fontSize: 14, // Increased from 12
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  company: {
+    fontSize: 12, // Increased from 11
+    color: '#6b7280',
+    marginBottom: 3, // Increased from 2
+  },
+  dates: {
+    fontSize: 11, // Increased from 10
+    color: '#9ca3af',
+    marginBottom: 5, // Increased from 4
+  },
+  description: {
+    fontSize: 11, // Increased from 10
+    lineHeight: 1.5, // Increased from 1.4
+    color: '#374151',
+  },
+  educationItem: {
+    marginBottom: 10, // Increased from 8
+  },
+  degree: {
+    fontSize: 12, // Increased from 11
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  institution: {
+    fontSize: 11, // Increased from 10
+    color: '#6b7280',
+  },
+  skillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  skill: {
+    fontSize: 11, // Increased from 10
+    color: '#374151',
+    marginRight: 15,
+    marginBottom: 5, // Increased from 4
+  },
+  projectItem: {
+    marginBottom: 12, // Increased from 10
+  },
+  projectName: {
+    fontSize: 12, // Increased from 11
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  projectDescription: {
+    fontSize: 11, // Increased from 10
+    color: '#374151',
+    lineHeight: 1.5, // Increased from 1.4
+  },
+});
+
+interface ResumePDFProps {
+  data: ResumeData;
+  template?: Template;
+}
+
+// Template-specific PDF layouts
+const ClassicPDF: React.FC<{ data: ResumeData; styles: any }> = ({ data, styles }) => (
+  <>
+    {/* Header */}
+    <View style={styles.header}>
+      <Text style={styles.name}>{data.personalInfo.name || 'No Name Provided'}</Text>
+      <Text style={styles.contactInfo}>{data.personalInfo.email}</Text>
+      <Text style={styles.contactInfo}>{data.personalInfo.phone}</Text>
+      <Text style={styles.contactInfo}>{data.personalInfo.location}</Text>
+      {data.personalInfo.linkedin && <Text style={styles.contactInfo}>{data.personalInfo.linkedin}</Text>}
+      {data.personalInfo.website && <Text style={styles.contactInfo}>{data.personalInfo.website}</Text>}
+    </View>
+
+    {/* Summary */}
+    {data.summary && (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Professional Summary</Text>
+        <Text style={styles.summary}>{data.summary}</Text>
+      </View>
+    )}
+
+    {/* Experience */}
+    {data.experience.length > 0 && (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Professional Experience</Text>
+        {data.experience.map((exp) => (
+          <View key={exp.id} style={styles.experienceItem}>
+            <Text style={styles.jobTitle}>{exp.role}</Text>
+            <Text style={styles.company}>{exp.company}</Text>
+            <Text style={styles.dates}>
+              {exp.startDate} - {exp.endDate || 'Present'}
+            </Text>
+            <Text style={styles.description}>{exp.description}</Text>
+          </View>
+        ))}
+      </View>
+    )}
+
+    {/* Education */}
+    {data.education.length > 0 && (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Education</Text>
+        {data.education.map((edu) => (
+          <View key={edu.id} style={styles.educationItem}>
+            <Text style={styles.degree}>{edu.degree}</Text>
+            <Text style={styles.institution}>{edu.institution}</Text>
+            <Text style={styles.dates}>
+              {edu.startDate} - {edu.endDate || 'Present'}
+            </Text>
+          </View>
+        ))}
+      </View>
+    )}
+
+    {/* Skills */}
+    {data.skills.length > 0 && (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Skills</Text>
+        <View style={styles.skillsContainer}>
+          {data.skills.map((skill) => (
+            <Text key={skill.id} style={styles.skill}>
+              • {skill.name}
+            </Text>
+          ))}
+        </View>
+      </View>
+    )}
+
+    {/* Projects */}
+    {data.projects.length > 0 && (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Projects</Text>
+        {data.projects.map((project) => (
+          <View key={project.id} style={styles.projectItem}>
+            <Text style={styles.projectName}>{project.name}</Text>
+            <Text style={styles.projectDescription}>{project.description}</Text>
+          </View>
+        ))}
+      </View>
+    )}
+
+    {/* References */}
+    {data.references.length > 0 && (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>References</Text>
+        {data.references.map((ref) => (
+          <View key={ref.id} style={styles.projectItem}>
+            <Text style={styles.projectName}>{ref.name}</Text>
+            <Text style={[styles.company, { fontSize: 11 }]}>{ref.title} - {ref.company}</Text>
+            {ref.relationship && (
+              <Text style={[styles.dates, { fontSize: 10 }]}>{ref.relationship}</Text>
+            )}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {ref.email && <Text style={[styles.contactInfo, { marginRight: 15 }]}>Email: {ref.email}</Text>}
+              {ref.phone && <Text style={styles.contactInfo}>Phone: {ref.phone}</Text>}
+            </View>
+          </View>
+        ))}
+      </View>
+    )}
+  </>
+);
+
+const ModernPDF: React.FC<{ data: ResumeData; styles: any }> = ({ data, styles }) => (
+  <View style={{ flexDirection: 'row' }}>
+    {/* Left Column */}
+    <View style={{ width: '35%', backgroundColor: '#f9fafb', padding: 20 }}>
+      <Text style={[styles.name, { fontSize: 22, marginBottom: 15 }]}>{data.personalInfo.name || 'No Name Provided'}</Text>
+      
+      {/* Contact */}
+      <View style={[styles.section, { marginBottom: 20 }]}>
+        <Text style={[styles.sectionTitle, { fontSize: 14, color: '#6366f1' }]}>CONTACT</Text>
+        <Text style={[styles.contactInfo, { fontSize: 11 }]}>{data.personalInfo.email}</Text>
+        <Text style={[styles.contactInfo, { fontSize: 11 }]}>{data.personalInfo.phone}</Text>
+        <Text style={[styles.contactInfo, { fontSize: 11 }]}>{data.personalInfo.location}</Text>
+      </View>
+
+      {/* Skills */}
+      {data.skills.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { fontSize: 14, color: '#6366f1' }]}>SKILLS</Text>
+          {data.skills.map((skill) => (
+            <Text key={skill.id} style={[styles.skill, { fontSize: 11, marginBottom: 3 }]}>
+              {skill.name}
+            </Text>
+          ))}
+        </View>
+      )}
+    </View>
+
+    {/* Right Column */}
+    <View style={{ width: '65%', padding: 20 }}>
+      {/* Summary */}
+      {data.summary && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: '#6366f1' }]}>SUMMARY</Text>
+          <Text style={styles.summary}>{data.summary}</Text>
+        </View>
+      )}
+
+      {/* Experience */}
+      {data.experience.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: '#6366f1' }]}>EXPERIENCE</Text>
+          {data.experience.map((exp) => (
+            <View key={exp.id} style={styles.experienceItem}>
+              <Text style={styles.jobTitle}>{exp.role}</Text>
+              <Text style={styles.company}>{exp.company}</Text>
+              <Text style={styles.dates}>
+                {exp.startDate} - {exp.endDate || 'Present'}
+              </Text>
+              <Text style={styles.description}>{exp.description}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Education */}
+      {data.education.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: '#6366f1' }]}>EDUCATION</Text>
+          {data.education.map((edu) => (
+            <View key={edu.id} style={styles.educationItem}>
+              <Text style={styles.degree}>{edu.degree}</Text>
+              <Text style={styles.institution}>{edu.institution}</Text>
+              <Text style={styles.dates}>
+                {edu.startDate} - {edu.endDate || 'Present'}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* References */}
+      {data.references.length > 0 && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: '#6366f1' }]}>REFERENCES</Text>
+          {data.references.map((ref) => (
+            <View key={ref.id} style={styles.projectItem}>
+              <Text style={styles.projectName}>{ref.name}</Text>
+              <Text style={[styles.company, { fontSize: 11 }]}>{ref.title} - {ref.company}</Text>
+              {ref.relationship && (
+                <Text style={[styles.dates, { fontSize: 10 }]}>{ref.relationship}</Text>
+              )}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {ref.email && <Text style={[styles.contactInfo, { marginRight: 15, fontSize: 10 }]}>Email: {ref.email}</Text>}
+                {ref.phone && <Text style={[styles.contactInfo, { fontSize: 10 }]}>Phone: {ref.phone}</Text>}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  </View>
+);
+
+const CreativePDF: React.FC<{ data: ResumeData; styles: any }> = ({ data, styles }) => (
+  <View style={{ flexDirection: 'row', height: '100%' }}>
+    {/* Left Sidebar - Enhanced Creative Design */}
+    <View style={{ 
+      width: '35%', 
+      backgroundColor: '#0f766e', // Rich teal background
+      padding: 20,
+      borderRight: '3px solid #14b8a6' // Brighter teal border
+    }}>
+      {/* Name in Sidebar */}
+      <Text style={[styles.name, { 
+        fontSize: 24, 
+        color: '#ffffff', // White text on dark background
+        marginBottom: 20,
+        textAlign: 'left',
+        fontWeight: 'bold'
+      }]}>
+        {data.personalInfo.name || 'Your Name'}
+      </Text>
+
+      {/* Contact Section */}
+      <View style={{ marginBottom: 20 }}>
+        <Text style={[styles.sectionTitle, { 
+          color: '#5eead4', // Light teal for headers
+          fontSize: 14, 
+          marginBottom: 10,
+          textTransform: 'uppercase',
+          letterSpacing: 1,
+          fontWeight: 'bold'
+        }]}>
+          CONTACT
+        </Text>
+        {data.personalInfo.email && (
+          <Text style={[styles.contactInfo, { fontSize: 10, marginBottom: 3, color: '#f0fdfa' }]}>
+            {data.personalInfo.email}
+          </Text>
+        )}
+        {data.personalInfo.phone && (
+          <Text style={[styles.contactInfo, { fontSize: 10, marginBottom: 3, color: '#f0fdfa' }]}>
+            {data.personalInfo.phone}
+          </Text>
+        )}
+        {data.personalInfo.location && (
+          <Text style={[styles.contactInfo, { fontSize: 10, marginBottom: 3, color: '#f0fdfa' }]}>
+            {data.personalInfo.location}
+          </Text>
+        )}
+      </View>
+
+      {/* Skills Section in Sidebar */}
+      {data.skills.length > 0 && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { 
+            color: '#5eead4', // Light teal for headers
+            fontSize: 14, 
+            marginBottom: 10,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 'bold'
+          }]}>
+            SKILLS
+          </Text>
+          {data.skills.map((skill) => (
+            <Text key={skill.id} style={[styles.skill, { 
+              fontSize: 10, 
+              marginBottom: 2, 
+              color: '#f0fdfa' // Light teal text
+            }]}>
+              • {skill.name}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      {/* Education Section in Sidebar */}
+      {data.education.length > 0 && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { 
+            color: '#5eead4', // Light teal for headers
+            fontSize: 14, 
+            marginBottom: 10,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 'bold'
+          }]}>
+            EDUCATION
+          </Text>
+          {data.education.map((edu) => (
+            <View key={edu.id} style={{ marginBottom: 8 }}>
+              <Text style={[styles.degree, { fontSize: 10, color: '#ffffff', fontWeight: 'bold' }]}>
+                {edu.degree}
+              </Text>
+              <Text style={[styles.institution, { fontSize: 9, color: '#f0fdfa' }]}>
+                {edu.institution}
+              </Text>
+              <Text style={[styles.dates, { fontSize: 8, color: '#ccfbf1' }]}>
+                {edu.startDate} - {edu.endDate || 'Present'}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+
+    {/* Right Main Content - Like the bottom image */}
+    <View style={{ width: '65%', padding: 20 }}>
+      {/* Summary Section */}
+      {data.summary && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { 
+            color: '#0f766e', // Darker teal to match sidebar
+            fontSize: 16, 
+            marginBottom: 10,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 'bold'
+          }]}>
+            SUMMARY
+          </Text>
+          <Text style={[styles.summary, { fontSize: 11, lineHeight: 1.5, color: '#374151' }]}>
+            {data.summary}
+          </Text>
+        </View>
+      )}
+
+      {/* Experience Section */}
+      {data.experience.length > 0 && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { 
+            color: '#0f766e', // Darker teal to match sidebar
+            fontSize: 16, 
+            marginBottom: 10,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 'bold'
+          }]}>
+            EXPERIENCE
+          </Text>
+          {data.experience.map((exp) => (
+            <View key={exp.id} style={{ marginBottom: 15 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                <Text style={[styles.jobTitle, { fontSize: 12, color: '#1e293b', fontWeight: 'bold' }]}>
+                  {exp.role}
+                </Text>
+                <Text style={[styles.dates, { fontSize: 10, color: '#64748b' }]}>
+                  {exp.startDate} - {exp.endDate || 'Present'}
+                </Text>
+              </View>
+              <Text style={[styles.company, { fontSize: 11, color: '#475569', fontStyle: 'italic', marginBottom: 5 }]}>
+                {exp.company}
+              </Text>
+              <Text style={[styles.description, { fontSize: 10, lineHeight: 1.4, color: '#374151' }]}>
+                {exp.description.split('\n').map((line, i) => 
+                  line ? `• ${line.replace(/^- /, '')}` : ''
+                ).filter(line => line).join('\n')}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Projects Section */}
+      {data.projects.length > 0 && (
+        <View style={{ marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { 
+            color: '#0f766e', // Darker teal to match sidebar
+            fontSize: 16, 
+            marginBottom: 10,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 'bold'
+          }]}>
+            PROJECTS
+          </Text>
+          {data.projects.map((project) => (
+            <View key={project.id} style={{ marginBottom: 12 }}>
+              <Text style={[styles.projectName, { fontSize: 12, color: '#1e293b', fontWeight: 'bold' }]}>
+                {project.name}
+              </Text>
+              <Text style={[styles.projectDescription, { fontSize: 10, lineHeight: 1.4, color: '#374151' }]}>
+                {project.description.split('\n').map((line, i) => 
+                  line ? `• ${line.replace(/^- /, '')}` : ''
+                ).filter(line => line).join('\n')}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* References Section */}
+      {data.references.length > 0 && (
+        <View>
+          <Text style={[styles.sectionTitle, { 
+            color: '#0f766e', // Darker teal to match sidebar
+            fontSize: 16, 
+            marginBottom: 10,
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+            fontWeight: 'bold'
+          }]}>
+            REFERENCES
+          </Text>
+          {data.references.map((ref) => (
+            <View key={ref.id} style={{ marginBottom: 12 }}>
+              <Text style={[styles.projectName, { fontSize: 12, color: '#1e293b', fontWeight: 'bold' }]}>
+                {ref.name}
+              </Text>
+              <Text style={[styles.company, { fontSize: 10, color: '#475569', fontStyle: 'italic' }]}>
+                {ref.title} - {ref.company}
+              </Text>
+              {ref.relationship && (
+                <Text style={[styles.dates, { fontSize: 9, color: '#64748b' }]}>
+                  {ref.relationship}
+                </Text>
+              )}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 3 }}>
+                {ref.email && (
+                  <Text style={[styles.contactInfo, { fontSize: 9, marginRight: 15, color: '#374151' }]}>
+                    Email: {ref.email}
+                  </Text>
+                )}
+                {ref.phone && (
+                  <Text style={[styles.contactInfo, { fontSize: 9, color: '#374151' }]}>
+                    Phone: {ref.phone}
+                  </Text>
+                )}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  </View>
+);
+
+const ResumePDF: React.FC<ResumePDFProps> = ({ data, template = 'classic' }) => {
+  console.log('PDF Generation - ResumePDF component received template:', template);
+  const templateStyles = StyleSheet.create(getTemplateStyles(template));
+  console.log('PDF Generation - Template styles generated for:', template);
+  
+  const renderTemplate = () => {
+    console.log('PDF Generation - Rendering template:', template);
+    console.log('PDF Generation - Template type check:', typeof template);
+    console.log('PDF Generation - Template === "creative":', template === 'creative');
+    
+    switch (template) {
+      case 'modern':
+        console.log('PDF Generation - Using ModernPDF component');
+        return <ModernPDF data={data} styles={styles} />;
+      case 'creative':
+        console.log('PDF Generation - ✅ CREATIVE TEMPLATE SELECTED - Using CreativePDF component');
+        return <CreativePDF data={data} styles={styles} />;
+      default:
+        console.log('PDF Generation - Using ClassicPDF component (default) - template was:', template);
+        return <ClassicPDF data={data} styles={styles} />;
+    }
+  };
+  
+  return (
+    <Document>
+      <Page size="A4" style={templateStyles.page}>
+        {renderTemplate()}
+      </Page>
+    </Document>
+  );
+};
+
+// Enhanced HTML-to-PDF generation with selectable text
 export async function generateHTMLToPDF(resumeData: ResumeData, filename: string = 'resume.pdf', template?: Template) {
   try {
     // Import jsPDF dynamically for text-based PDF creation
@@ -63,6 +661,12 @@ export async function generateHTMLToPDF(resumeData: ResumeData, filename: string
       }
     };
 
+    // Add section separator (will be updated with template colors)
+    let addSectionSeparator: () => void;
+
+    // Generate PDF content based on template
+    console.log('PDF Generation - Building content for template:', actualTemplate);
+
     // Template-specific colors and styling
     const templateConfig = {
       classic: {
@@ -78,7 +682,7 @@ export async function generateHTMLToPDF(resumeData: ResumeData, filename: string
         accentColor: '#64748b'   // Light gray
       },
       creative: {
-        primaryColor: '#0f766e', // Teal (matching the creative template)
+        primaryColor: '#7c3aed', // Purple
         headerColor: '#1e293b',  // Dark slate
         textColor: '#374151',    // Gray
         accentColor: '#64748b'   // Light gray
@@ -89,7 +693,7 @@ export async function generateHTMLToPDF(resumeData: ResumeData, filename: string
     console.log('PDF Generation - Using color scheme for template:', actualTemplate, config);
 
     // Add section separator with template-specific color
-    const addSectionSeparator = () => {
+    addSectionSeparator = () => {
       yPosition += 5;
       const hexToRgb = (hex: string) => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -230,3 +834,48 @@ export async function generateHTMLToPDF(resumeData: ResumeData, filename: string
     throw error;
   }
 }
+
+export async function generateTextBasedPDF(resumeData: ResumeData, filename: string = 'resume.pdf', template?: Template) {
+  try {
+    // Get template from localStorage if not provided
+    const actualTemplate = template || (localStorage.getItem('resumai-template') as Template) || 'classic';
+    
+    // Debug: Log the data being passed to PDF generator
+    console.log('PDF Generation - Resume Data:', resumeData);
+    console.log('PDF Generation - Template parameter:', template);
+    console.log('PDF Generation - Actual template used:', actualTemplate);
+    console.log('PDF Generation - Personal Info:', resumeData.personalInfo);
+    console.log('PDF Generation - Has Experience:', resumeData.experience.length > 0);
+    console.log('PDF Generation - Has Education:', resumeData.education.length > 0);
+    
+    // Generate PDF blob
+    const blob = await pdf(<ResumePDF data={resumeData} template={actualTemplate} />).toBlob();
+    
+    // Debug: Check blob size
+    console.log('PDF Generation - Blob size:', blob.size, 'bytes');
+    if (blob.size < 1000) {
+      console.warn('PDF Generation - Warning: PDF blob is very small, might be empty');
+    }
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+    
+    return true;
+  } catch (error) {
+    console.error('Error generating text-based PDF:', error);
+    throw error;
+  }
+}
+
+export default ResumePDF;

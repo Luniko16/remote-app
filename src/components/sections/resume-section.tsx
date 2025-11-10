@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { resume } from '@/lib/data';
-import { Download, Award, Trophy, ExternalLink } from 'lucide-react';
+import { Download, Award, Trophy, ExternalLink, Mail, Phone, User } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
@@ -11,10 +11,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer';
 import { useToast } from '@/hooks/use-toast';
-import { generateHTMLToPDF } from '@/lib/pdf-generator';
-import type { ResumeData } from '@/lib/types';
-import { useTemplate } from '@/contexts/template-context';
-import { TemplateSelector } from '@/components/template-selector';
+
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-3xl md:text-4xl font-bold text-primary mb-12 text-center">{children}</h2>;
@@ -26,7 +23,6 @@ function SubsectionTitle({ children }: { children: React.ReactNode }) {
 
 export function ResumeSection() {
   const { theme } = useTheme();
-  const { template } = useTemplate();
   const [title, setTitle] = useState("My Journey");
   const [isGamer, setIsGamer] = useState(false);
   const [isProfessional, setIsProfessional] = useState(false);
@@ -55,88 +51,34 @@ export function ResumeSection() {
     }
   }, [isIntersecting, isGamer, achievementUnlocked, toast]);
 
-  // Convert resume data to ResumeData format
-  const getResumeData = (): ResumeData => {
-    return {
-      personalInfo: {
-        name: "Ntsika Mtshixa",
-        email: "ntsikamtshixa@gmail.com",
-        phone: "+27 73 123 4567",
-        location: "Cape Town, South Africa",
-        linkedin: "linkedin.com/in/ntsika-mtshixa",
-        website: "ntsikamtshixa.dev"
-      },
-      summary: "Passionate software developer and AI enthusiast with expertise in full-stack development, machine learning, and modern web technologies. Experienced in building scalable applications and implementing AI solutions.",
-      experience: resume.workExperience.map((work, index) => ({
-        id: `exp-${index}`,
-        role: work.role,
-        company: work.company,
-        startDate: work.period.split(' - ')[0],
-        endDate: work.period.split(' - ')[1] || 'Present',
-        description: work.description
-      })),
-      education: resume.education.map((edu, index) => ({
-        id: `edu-${index}`,
-        degree: edu.degree,
-        institution: edu.institution,
-        startDate: edu.period.split(' - ')[0],
-        endDate: edu.period.split(' - ')[1] || 'Present'
-      })),
-      skills: [
-        { id: 'skill-1', name: 'JavaScript/TypeScript' },
-        { id: 'skill-2', name: 'React/Next.js' },
-        { id: 'skill-3', name: 'Node.js' },
-        { id: 'skill-4', name: 'Python' },
-        { id: 'skill-5', name: 'Machine Learning' },
-        { id: 'skill-6', name: 'AI/LLMs' },
-        { id: 'skill-7', name: 'Database Design' },
-        { id: 'skill-8', name: 'Cloud Computing' }
-      ],
-      projects: [
-        {
-          id: 'proj-1',
-          name: 'AI Resume Builder',
-          description: 'Full-stack application for generating professional resumes using AI technology',
-          url: 'https://github.com/ntsika-mtshixa/resume-builder'
-        },
-        {
-          id: 'proj-2',
-          name: 'Crop Disease Detection',
-          description: 'Machine learning model for detecting plant diseases using computer vision',
-          url: 'https://github.com/ntsika-mtshixa/crop-disease-detection'
-        }
-      ],
-      references: []
-    };
-  };
-
   const handleDownloadPDF = async () => {
     try {
       setIsGeneratingPDF(true);
-      
-      console.log('PDF Download - Current template:', template);
-      
+
       toast({
-        title: "Generating PDF...",
-        description: `Creating your resume with ${template} template`,
+        title: "Downloading CV...",
+        description: "Your resume is being downloaded",
         duration: 2000,
       });
 
-      const resumeData = getResumeData();
-      
-      // Use the enhanced jsPDF method (no html2canvas)
-      await generateHTMLToPDF(resumeData, 'Ntsika_Mtshixa_Resume.pdf', template);
-      
+      // Create a link element to download the static PDF
+      const link = document.createElement('a');
+      link.href = '/Ntsika Mtshixa.pdf.pdf';
+      link.download = 'Ntsika_Mtshixa_CV.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       toast({
-        title: "✅ PDF Generated!",
-        description: `Your ${template} template resume has been downloaded successfully`,
+        title: "✅ CV Downloaded!",
+        description: "Your resume has been downloaded successfully",
         duration: 3000,
       });
     } catch (error) {
-      console.error('PDF generation failed:', error);
+      console.error('PDF download failed:', error);
       toast({
-        title: "❌ PDF Generation Failed",
-        description: "There was an error generating your PDF. Please try again.",
+        title: "❌ Download Failed",
+        description: "There was an error downloading your CV. Please try again.",
         variant: "destructive",
         duration: 5000,
       });
@@ -146,8 +88,8 @@ export function ResumeSection() {
   };
 
   return (
-    <section 
-      id="resume" 
+    <section
+      id="resume"
       ref={ref}
       className={cn(
         "py-16 md:py-24 bg-transparent",
@@ -157,15 +99,15 @@ export function ResumeSection() {
     >
       <div className="container max-w-6xl mx-auto">
         <SectionTitle>{title}</SectionTitle>
-        
+
         {/* Education Section */}
         <div className="mb-20">
           <SubsectionTitle>{isGamer ? "Training Grounds" : "Education"}</SubsectionTitle>
           <div className="max-w-3xl mx-auto">
             <div className="space-y-8 relative border-l-2 border-accent/30 pl-8">
               {resume.education.map((edu, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={cn(
                     "relative",
                     isProfessional && isIntersecting && "animate-fade-in-up opacity-0"
@@ -188,11 +130,11 @@ export function ResumeSection() {
           <div className="max-w-3xl mx-auto">
             <div className="space-y-8 relative border-l-2 border-accent/30 pl-8">
               {resume.workExperience.map((work, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={cn(
                     "relative",
-                     isProfessional && isIntersecting && "animate-fade-in-left opacity-0"
+                    isProfessional && isIntersecting && "animate-fade-in-left opacity-0"
                   )}
                   style={{ animationDelay: isProfessional ? `${(resume.education.length + index) * 200}ms` : '0ms' }}
                 >
@@ -253,9 +195,80 @@ export function ResumeSection() {
           </div>
         </div>
 
+        {/* References Section */}
+        <div className="mb-16">
+          <SubsectionTitle>{isGamer ? 'Guild Members' : 'References'}</SubsectionTitle>
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {resume.references.map((ref, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "p-6 rounded-lg transition-all duration-300 relative overflow-hidden",
+                  isGamer ? 'card-glowing-border hover:scale-105' : 'border bg-card hover:shadow-xl hover:-translate-y-2',
+                  isProfessional && isIntersecting && "animate-fade-in-up opacity-0"
+                )}
+                style={{ animationDelay: isProfessional ? `${(resume.education.length + resume.workExperience.length + resume.certificates.length + index) * 200}ms` : '0ms' }}
+              >
+                <div className="flex items-start space-x-3 mb-4">
+                  <div className={cn(
+                    "p-2 rounded-full flex-shrink-0",
+                    isGamer ? 'bg-accent/20' : 'bg-primary/10'
+                  )}>
+                    <User className={cn(
+                      "w-5 h-5",
+                      isGamer ? 'text-accent' : 'text-primary'
+                    )} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-lg mb-1 truncate">
+                      {isGamer ? `👤 ${ref.name}` : ref.name}
+                    </h4>
+                    <p className="text-primary font-medium text-sm truncate">{ref.title}</p>
+                    <p className="text-muted-foreground text-sm truncate">{ref.company}</p>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full inline-block">
+                    {ref.relationship}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <a
+                      href={`mailto:${ref.email}`}
+                      className="text-primary hover:underline truncate min-w-0"
+                      title={ref.email}
+                    >
+                      {ref.email}
+                    </a>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <a
+                      href={`tel:${ref.phone}`}
+                      className="text-primary hover:underline"
+                    >
+                      {ref.phone}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* References Note */}
+          <div className="text-center mt-8">
+            <p className="text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-lg inline-block">
+              {isGamer ? '🔒 Additional references available upon request' : 'Additional references available upon request'}
+            </p>
+          </div>
+        </div>
+
         <div className="text-center mt-16">
-          <TemplateSelector />
-          <Button 
+          <Button
             onClick={handleDownloadPDF}
             disabled={isGeneratingPDF}
             size="lg"
@@ -268,7 +281,7 @@ export function ResumeSection() {
               "mr-2 h-5 w-5",
               isGeneratingPDF && "animate-spin"
             )} />
-            {isGeneratingPDF ? "Generating PDF..." : "Download My Resume"}
+            {isGeneratingPDF ? "Downloading..." : "Download My CV"}
           </Button>
         </div>
       </div>
