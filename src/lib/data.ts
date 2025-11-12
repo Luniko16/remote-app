@@ -222,14 +222,14 @@ export const resume = {
       name: 'CompTIA A+ Certification',
       issuer: 'Boston City College',
       date: '2023',
-      url: '/api/certificate?file=CompTIA A+ ce certificate.pdf',
+      url: '/api/certificate?file=CompTIA A+.pdf',
       coverImage: '/CompTIA A+ cover.jpg',
     },
     {
       name: 'CompTIA Network+ Certification',
       issuer: 'Boston City College',
       date: '2023',
-      url: '/api/certificate?file=CompTIA Network+ ce certificate.pdf',
+      url: '/api/certificate?file=CompTIA Network+.pdf',
       coverImage: '/CompTIA Network+ cover.jpg',
     },
     {
