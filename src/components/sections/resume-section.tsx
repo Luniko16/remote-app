@@ -154,13 +154,11 @@ export function ResumeSection() {
           <SubsectionTitle>{isGamer ? 'Achievements Unlocked' : 'Certificates'}</SubsectionTitle>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resume.certificates.map((cert, index) => (
-              <a
+              <div
                 key={index}
-                href={cert.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={() => window.open(cert.url, '_blank')}
                 className={cn(
-                  "group overflow-hidden rounded-lg transition-all duration-300 block",
+                  "group overflow-hidden rounded-lg transition-all duration-300 cursor-pointer",
                   isGamer ? 'card-glowing-border hover:scale-105' : 'border bg-card hover:shadow-xl hover:-translate-y-2'
                 )}
               >
@@ -190,7 +188,7 @@ export function ResumeSection() {
                     </>
                   )}
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         </div>
